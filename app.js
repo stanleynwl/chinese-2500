@@ -463,7 +463,7 @@ function renderHome() {
 }
 
 // ─── TODAY（SRS 队列） ──────────────
-let todayChars = [], todayIdx = 0, todayCorrect = new Set();
+let todayChars = [], todayIdx = 0, todayCorrect = new Set(), todayAnswered = new Set();
 let studyMode = 'today'; // today | review | new | all | custom
 let customChars = null, customLabel = '', customDay = -1;
 let queueNewSet = new Set(); // 本队列中哪些是新字
@@ -499,6 +499,7 @@ function renderToday() {
   todayChars = getStudyChars();
   todayIdx = 0;
   todayCorrect = new Set();
+  todayAnswered = new Set();
   if (!todayChars.length) {
     $('#flashcardArea').classList.add('hidden');
     $('#todayComplete').classList.remove('hidden');
@@ -586,26 +587,29 @@ function renderTodayCharsRow() {
 function markCurrentChar(known) {
   const c = todayChars[todayIdx];
   if (!c) return;
-  const wasNew = !state.srs[c.char];
-  srsAnswer(c.char, known);
-  if (wasNew) logActivity('new'); else logActivity('rev');
-  saveState();
+  // 每个字每轮只记一次 SRS，反复复习不会重复加分
+  if (!todayAnswered.has(c.char)) {
+    const wasNew = !state.srs[c.char];
+    srsAnswer(c.char, known);
+    if (wasNew) logActivity('new'); else logActivity('rev');
+    saveState();
+    todayAnswered.add(c.char);
+  }
   if (known) {
+    const before = todayCorrect.size;
     todayCorrect.add(c.char);
-    if (todayCorrect.size % 5 === 0) mascotSay('praise');
-    todayChars.splice(todayIdx, 1);
+    if (todayCorrect.size !== before && todayCorrect.size % 5 === 0) mascotSay('praise');
   } else {
-    // 没记住：移到队尾再来
-    const item = todayChars.splice(todayIdx, 1)[0];
-    todayChars.push(item);
+    todayCorrect.delete(c.char);
   }
-  if (todayIdx >= todayChars.length) todayIdx = 0;
-  if (todayChars.length === 0) {
-    finishTodaySession();
-  } else {
-    renderFlashcard();
-    renderTodayCharsRow();
+  // 字不会消失：按顺序往下翻，到最后一个再回到第一个
+  todayIdx++;
+  if (todayIdx >= todayChars.length) {
+    todayIdx = 0;
+    if (todayCorrect.size === todayChars.length) { finishTodaySession(); return; }
   }
+  renderFlashcard();
+  renderTodayCharsRow();
 }
 
 function finishTodaySession() {
@@ -1553,6 +1557,7 @@ $('#practiceAgainBtn').addEventListener('click', () => {
   shuffle(todayChars);
   todayIdx = 0;
   todayCorrect = new Set();
+  todayAnswered = new Set();
   if (!todayChars.length) { renderToday(); return; }
   $('#todayComplete').classList.add('hidden');
   $('#flashcardArea').classList.remove('hidden');
@@ -1569,6 +1574,7 @@ $('#practiceUnknownBtn').addEventListener('click', () => {
   todayChars = shuffle(unknown);
   todayIdx = 0;
   todayCorrect = new Set();
+  todayAnswered = new Set();
   $('#todayComplete').classList.add('hidden');
   $('#flashcardArea').classList.remove('hidden');
   renderFlashcard();
