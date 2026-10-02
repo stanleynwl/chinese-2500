@@ -1358,9 +1358,24 @@ bindSetting('#setProfile', 'profile', el => el.value, val => {
   // 高级模式自动关拼音
   state.settings.showPinyin = val !== 'advanced';
   $('#setShowPinyin').checked = state.settings.showPinyin;
+  updatePinyinToggle();
   saveState();
 });
-bindSetting('#setShowPinyin', 'showPinyin', el => el.checked);
+bindSetting('#setShowPinyin', 'showPinyin', el => el.checked, () => updatePinyinToggle());
+function updatePinyinToggle() {
+  const on = state.settings.showPinyin;
+  const btn = $('#pinyinToggleBtn');
+  btn.textContent = on ? '拼音：开' : '拼音：关';
+  btn.classList.toggle('off', !on);
+}
+$('#pinyinToggleBtn').addEventListener('click', () => {
+  state.settings.showPinyin = !state.settings.showPinyin;
+  $('#setShowPinyin').checked = state.settings.showPinyin;
+  saveState();
+  updatePinyinToggle();
+  if (todayChars.length) { renderFlashcard(); renderTodayCharsRow(); }
+});
+updatePinyinToggle();
 bindSetting('#setTtsVoice', 'ttsVoice', el => el.value, () => loadVoices());
 bindSetting('#setTheme', 'theme');
 bindSetting('#setFont', 'font');
