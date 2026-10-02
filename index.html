@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#c0392b">
+<title>小学识字2500 · 学习伙伴</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5.0/dist/hanzi-writer.min.js"></script>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <span class="logo-icon">字</span>
+      <div>
+        <div class="logo-title">小学识字2500</div>
+        <div class="logo-sub" id="logoSub">每天进步一点点</div>
+      </div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-btn active" data-view="home">🏠 首页</button>
+      <button class="nav-btn" data-view="today">📖 学习</button>
+      <button class="nav-btn" data-view="plan">🗺️ 地图</button>
+      <button class="nav-btn" data-view="browse">🔍 翻翻看</button>
+      <button class="nav-btn" data-view="quiz">✏️ 练习</button>
+    </nav>
+    <div class="header-icons">
+      <button class="icon-btn" id="dashboardBtn" title="家长面板" data-view="dashboard">📊</button>
+      <button class="icon-btn" id="settingsBtn" title="设置" data-view="settings">⚙️</button>
+      <button class="menu-btn" id="menuToggle">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-btn active" data-view="home">🏠 首页</button>
+  <button class="mobile-nav-btn" data-view="today">📖 学习</button>
+  <button class="mobile-nav-btn" data-view="plan">🗺️ 地图</button>
+  <button class="mobile-nav-btn" data-view="browse">🔍 翻翻看</button>
+  <button class="mobile-nav-btn" data-view="quiz">✏️ 练习</button>
+  <button class="mobile-nav-btn" data-view="dashboard">📊 家长</button>
+  <button class="mobile-nav-btn" data-view="settings">⚙️ 设置</button>
+</div>
+
+<main class="main" id="app">
+
+  <!-- iOS 发音提示 -->
+  <div class="ios-tip hidden" id="iosTip">
+    <span class="ios-tip-icon">📢</span>
+    <span class="ios-tip-text">iPhone/iPad 用户：请<b>关闭侧边静音开关</b>并调高音量，点击 <b>🔊</b> 即可收听发音。</span>
+    <button class="ios-tip-close" id="iosTipClose">×</button>
+  </div>
+
+  <!-- 备份提醒 -->
+  <div class="ios-tip backup-tip hidden" id="backupTip">
+    <span class="ios-tip-icon">💾</span>
+    <span class="ios-tip-text">已经好久没有备份学习记录啦，建议<b>导出一份</b>保存到云盘。</span>
+    <button class="card-btn speak small" id="backupTipExport">立即导出</button>
+    <button class="ios-tip-close" id="backupTipClose">×</button>
+  </div>
+
+  <!-- ═══════════════ HOME ═══════════════ -->
+  <div class="view active" id="view-home">
+    <div class="mascot-card" id="mascotCard">
+      <div class="mascot-face" id="mascotFace">🐼</div>
+      <div class="mascot-bubble" id="mascotBubble">你好呀！今天也一起学汉字吧！</div>
+    </div>
+
+    <div class="home-hero">
+      <div class="tree-progress">
+        <div class="tree-visual" id="treeVisual">🌱</div>
+        <div class="tree-info">
+          <div class="tree-label" id="treeLabel">学习小树苗</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+          <div class="tree-stats" id="treeStats">0 / 2527 字</div>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card primary"><div class="stat-num" id="stat-mastered">0</div><div class="stat-label">已掌握</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-learning">0</div><div class="stat-label">学习中</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-due">0</div><div class="stat-label">待复习</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-streak">0天</div><div class="stat-label">连续学习</div></div>
+      </div>
+      <div class="home-actions">
+        <button class="start-btn" id="startTodayBtn">开始今日学习 →</button>
+        <button class="focus-btn" id="focusBtn">🧘 专注模式</button>
+      </div>
+    </div>
+
+    <div class="home-categories">
+      <h2 class="section-title">分类进度</h2>
+      <div class="category-grid" id="categoryGrid"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TODAY ═══════════════ -->
+  <div class="view" id="view-today">
+    <div class="study-modes">
+      <button class="study-mode-btn active" data-smode="today">📖 今日任务</button>
+      <button class="study-mode-btn" data-smode="review">🔄 只复习</button>
+      <button class="study-mode-btn" data-smode="new">✨ 只学新字</button>
+      <button class="study-mode-btn" data-smode="all">📚 全部已学</button>
+    </div>
+    <div class="today-header">
+      <div class="today-meta">
+        <span id="today-week-label">第1周 周一</span>
+        <span class="today-count" id="today-count">0 / 10 字</span>
+      </div>
+      <div class="progress-bar-wrap thin"><div class="progress-bar-fill" id="today-progress-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="flashcard-area" id="flashcardArea">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner" id="flashcardInner">
+          <div class="flashcard-front" id="flashcardFront">
+            <button class="fc-speak-btn" id="fcSpeakFrontBtn" title="朗读">🔊</button>
+            <button class="fc-write-btn" id="fcWriteBtn" title="学写字">✍️</button>
+            <div class="fc-srs-badge" id="fcSrsBadge"></div>
+            <div class="fc-pinyin" id="fc-pinyin"></div>
+            <div class="fc-char" id="fc-char"></div>
+            <div class="fc-part" id="fc-part"></div>
+            <div class="fc-hint">点击翻转查看组词例句</div>
+          </div>
+          <div class="flashcard-back" id="flashcardBack">
+            <button class="fc-speak-btn" id="fcSpeakBackBtn" title="朗读例句">🔊</button>
+            <div class="fc-char-small" id="fc-char-small"></div>
+            <div class="fc-compounds" id="fc-compounds"></div>
+            <div class="fc-sentence" id="fc-sentence"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-nav">
+        <button class="card-btn retry big" id="retryBtn">🤔 再想想</button>
+        <div class="card-index" id="cardIndex">1/10</div>
+        <button class="card-btn know big" id="knowBtn">😊 认识！</button>
+      </div>
+    </div>
+
+    <div class="today-complete hidden" id="todayComplete">
+      <div class="complete-icon" id="completeIcon">🎉</div>
+      <div class="complete-title" id="completeTitle">今日学习完成！</div>
+      <div class="complete-sub" id="completeSub"></div>
+      <div class="complete-actions">
+        <button class="card-btn retry" id="practiceAgainBtn">🔄 再练一遍</button>
+        <button class="card-btn speak" id="practiceUnknownBtn">📝 只练不熟的</button>
+        <button class="start-btn" id="nextDayBtn">明天继续 →</button>
+      </div>
+    </div>
+
+    <div class="today-chars-preview">
+      <h3 class="section-title">本组生字</h3>
+      <div class="chars-row" id="todayCharsRow"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PLAN (Journey Map) ═══════════════ -->
+  <div class="view" id="view-plan">
+    <div class="plan-header">
+      <h2 class="section-title">学习地图 · 50周之旅</h2>
+      <button class="filter-toggle" id="planViewToggle" style="display:block">📋 表格视图</button>
+    </div>
+
+    <div class="journey-map" id="journeyMap"></div>
+
+    <div class="plan-table-wrap hidden" id="planTableWrap">
+      <table class="plan-table" id="planTable">
+        <thead><tr><th>周次</th><th>第1天</th><th>第2天</th><th>第3天</th><th>第4天</th><th>第5天</th></tr></thead>
+        <tbody id="planTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="plan-modal hidden" id="planModal">
+      <div class="plan-modal-box">
+        <div class="plan-modal-header">
+          <span id="planModalTitle">第1周 第1天</span>
+          <button class="modal-close" id="planModalClose">×</button>
+        </div>
+        <div class="plan-modal-chars" id="planModalChars"></div>
+        <div class="plan-modal-footer">
+          <button class="start-btn" id="planPracticeBtn">📝 练习这一天的字</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ BROWSE ═══════════════ -->
+  <div class="view" id="view-browse">
+    <div class="browse-toolbar">
+      <input class="search-input" id="searchInput" type="text" placeholder="搜索汉字或拼音…">
+      <button class="filter-toggle" id="filterToggle">📂 分类</button>
+    </div>
+    <div class="browse-layout">
+      <aside class="browse-sidebar" id="browseSidebar"><div class="sidebar-inner" id="sidebarList"></div></aside>
+      <div class="browse-grid-wrap"><div class="browse-grid" id="browseGrid"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ QUIZ ═══════════════ -->
+  <div class="view" id="view-quiz">
+    <div class="quiz-modes">
+      <button class="quiz-mode-btn active" data-mode="recognize">认字</button>
+      <button class="quiz-mode-btn" data-mode="compose">组词</button>
+      <button class="quiz-mode-btn" data-mode="listen">听音</button>
+      <button class="quiz-mode-btn" data-mode="write">写字</button>
+    </div>
+    <div class="quiz-desc" id="quizDesc">看拼音，选出正确的汉字</div>
+
+    <div class="quiz-area" id="quizArea">
+      <div class="quiz-prompt" id="quizPrompt"></div>
+      <div class="quiz-write-area hidden" id="quizWriteArea">
+        <div class="quiz-writer-target" id="quizWriterTarget"></div>
+        <div class="quiz-write-controls">
+          <button class="card-btn speak small" id="quizWriteHintBtn">💡 提示笔画</button>
+          <button class="card-btn retry small" id="quizWriteSkipBtn">跳过</button>
+        </div>
+      </div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-feedback hidden" id="quizFeedback"></div>
+    </div>
+
+    <div class="quiz-footer" id="quizFooter">
+      <div class="quiz-score-row">
+        <span>第 <span id="quizQ">1</span>/10 题</span>
+        <span id="quizPoolInfo" class="quiz-pool-info"></span>
+        <span>得分：<span id="quizScore">0</span></span>
+      </div>
+      <div class="progress-bar-wrap thin"><div class="progress-bar-fill" id="quizProgressBar" style="width:10%"></div></div>
+    </div>
+
+    <div class="quiz-result hidden" id="quizResult">
+      <div class="result-icon" id="resultIcon">🌟</div>
+      <div class="result-title" id="resultTitle">答对了！</div>
+      <div class="result-score" id="resultScore">得分：10/10</div>
+      <button class="start-btn" id="quizAgainBtn">再来一轮</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PARENT DASHBOARD ═══════════════ -->
+  <div class="view" id="view-dashboard">
+    <h2 class="section-title">📊 家长面板</h2>
+    <div class="dash-summary" id="dashSummary"></div>
+
+    <div class="dash-section">
+      <h3 class="dash-h3">最近 14 天 · 正确率与学习量</h3>
+      <div class="dash-chart" id="dashAccuracyChart"></div>
+    </div>
+
+    <div class="dash-section">
+      <h3 class="dash-h3">每日学习时长（分钟）</h3>
+      <div class="dash-chart" id="dashTimeChart"></div>
+    </div>
+
+    <div class="dash-two-col">
+      <div class="dash-section">
+        <h3 class="dash-h3">⚠️ 需要加强的字 <span class="dash-count" id="weakCount"></span></h3>
+        <div class="dash-char-list" id="weakList"></div>
+      </div>
+      <div class="dash-section">
+        <h3 class="dash-h3">🏆 最近掌握的字 <span class="dash-count" id="masteredCount"></span></h3>
+        <div class="dash-char-list" id="masteredList"></div>
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <h3 class="dash-h3">分类强弱分析</h3>
+      <div class="dash-cats" id="dashCats"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SETTINGS ═══════════════ -->
+  <div class="view" id="view-settings">
+    <h2 class="section-title">⚙️ 设置</h2>
+
+    <div class="settings-group">
+      <h3 class="dash-h3">学习</h3>
+      <div class="setting-row">
+        <label>每天新字数量</label>
+        <select id="setPerDay">
+          <option value="5">5 字</option><option value="10" selected>10 字</option>
+          <option value="15">15 字</option><option value="20">20 字</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>学习模式</label>
+        <select id="setProfile">
+          <option value="beginner">初级（显示拼音）</option>
+          <option value="advanced">高级（隐藏拼音 · 鼓励写字）</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>卡片显示拼音</label>
+        <label class="switch"><input type="checkbox" id="setShowPinyin" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3 class="dash-h3">朗读</h3>
+      <div class="setting-row">
+        <label>语速 <span id="rateValue">0.8</span></label>
+        <input type="range" id="setTtsRate" min="0.5" max="1.2" step="0.1" value="0.8">
+      </div>
+      <div class="setting-row">
+        <label>声音</label>
+        <select id="setTtsVoice"><option value="">自动选择</option></select>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3 class="dash-h3">外观</h3>
+      <div class="setting-row">
+        <label>主题</label>
+        <select id="setTheme">
+          <option value="light">明亮（默认）</option>
+          <option value="calm">护眼绿</option>
+          <option value="dark">深色</option>
+          <option value="contrast">高对比</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>字体</label>
+        <select id="setFont">
+          <option value="default">标准</option>
+          <option value="rounded">圆润可爱</option>
+          <option value="dyslexic">易读（间距加大）</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>字号</label>
+        <select id="setFontSize">
+          <option value="normal">标准</option>
+          <option value="large">大</option>
+          <option value="xl">特大</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label>减少动画</label>
+        <label class="switch"><input type="checkbox" id="setReducedMotion"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3 class="dash-h3">学习记录 · 跨设备同步</h3>
+      <div class="settings-buttons">
+        <button class="card-btn speak" id="exportBtn">📤 导出文件</button>
+        <button class="card-btn know" id="importBtn">📥 导入文件</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+      <div class="settings-buttons">
+        <button class="card-btn speak" id="syncCopyBtn">📋 复制同步码</button>
+        <button class="card-btn know" id="syncPasteBtn">📲 粘贴同步码</button>
+      </div>
+      <p class="settings-hint">同步码：在这台设备点"复制同步码"，到另一台设备点"粘贴同步码"即可转移全部进度。文件导出适合长期备份到云盘。进度也会自动保存在本机。</p>
+      <div class="settings-buttons">
+        <button class="card-btn retry" id="resetBtn">🗑️ 清空记录</button>
+        <button class="card-btn retry" id="replayOnboardingBtn">🔁 重看新手引导</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════ 字符详情弹窗（含笔顺） ═══════ -->
+<div class="char-modal hidden" id="charModal">
+  <div class="char-modal-box">
+    <button class="modal-close" id="charModalClose">×</button>
+    <div class="char-modal-top">
+      <div class="char-modal-writer" id="charModalWriter"></div>
+      <div class="char-modal-side">
+        <div class="char-modal-pinyin" id="charModalPinyin"></div>
+        <div class="char-modal-badges">
+          <span class="badge part" id="charModalPart"></span>
+          <span class="badge cat" id="charModalCat"></span>
+          <span class="badge srs" id="charModalSrs"></span>
+        </div>
+      </div>
+    </div>
+    <div class="char-modal-writer-controls">
+      <button class="card-btn speak small" id="charModalSpeak">🔊 读</button>
+      <button class="card-btn speak small" id="charModalAnimate">▶️ 笔顺</button>
+      <button class="card-btn know small" id="charModalTrace">✍️ 描红</button>
+    </div>
+    <div class="char-modal-section">
+      <div class="char-modal-label">组词</div>
+      <div class="char-modal-compounds" id="charModalCompounds"></div>
+    </div>
+    <div class="char-modal-section">
+      <div class="char-modal-label">例句</div>
+      <div class="char-modal-sentence" id="charModalSentence"></div>
+    </div>
+    <div class="char-modal-actions">
+      <button class="card-btn know" id="charModalKnow">✓ 标记已学</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 专注模式 ═══════ -->
+<div class="focus-overlay hidden" id="focusOverlay">
+  <!-- 选择时长 -->
+  <div class="focus-setup" id="focusSetup">
+    <div class="focus-setup-icon">🧘</div>
+    <h2>专注学习</h2>
+    <p>安安静静，一次一张卡</p>
+    <div class="focus-duration-row">
+      <button class="focus-dur-btn" data-min="5">5 分钟</button>
+      <button class="focus-dur-btn active" data-min="10">10 分钟</button>
+      <button class="focus-dur-btn" data-min="15">15 分钟</button>
+    </div>
+    <button class="start-btn" id="focusStartBtn">开始 →</button>
+    <button class="focus-exit-link" id="focusCancelBtn">返回</button>
+  </div>
+
+  <!-- 学习中 -->
+  <div class="focus-session hidden" id="focusSession">
+    <div class="focus-timer" id="focusTimer">10:00</div>
+    <div class="focus-card" id="focusCard">
+      <div class="focus-card-pinyin" id="focusPinyin"></div>
+      <div class="focus-card-char" id="focusChar"></div>
+      <div class="focus-card-detail hidden" id="focusDetail">
+        <div class="focus-card-compounds" id="focusCompounds"></div>
+        <div class="focus-card-sentence" id="focusSentence"></div>
+      </div>
+    </div>
+    <div class="focus-actions">
+      <button class="card-btn retry big" id="focusAgainBtn">🤔 再想想</button>
+      <button class="card-btn speak big" id="focusSpeakBtn">🔊</button>
+      <button class="card-btn know big" id="focusKnowBtn">😊 认识！</button>
+    </div>
+    <button class="focus-exit-link" id="focusExitBtn">提前结束</button>
+  </div>
+
+  <!-- 休息提醒 -->
+  <div class="focus-break hidden" id="focusBreak">
+    <div class="focus-setup-icon">🌸</div>
+    <h2>休息一下</h2>
+    <p>看看远处，眨眨眼睛～</p>
+    <button class="start-btn" id="focusResumeBtn">继续 →</button>
+  </div>
+
+  <!-- 结束总结 -->
+  <div class="focus-done hidden" id="focusDone">
+    <div class="focus-setup-icon" id="focusDoneIcon">🎉</div>
+    <h2>专注完成！</h2>
+    <p id="focusDoneSummary"></p>
+    <button class="start-btn" id="focusDoneBtn">太棒了！</button>
+  </div>
+</div>
+
+<!-- ═══════ 新手引导 ═══════ -->
+<div class="onboarding-overlay hidden" id="onboardingOverlay">
+  <div class="onboarding-card">
+    <div class="onboarding-step" data-step="0">
+      <div class="ob-icon">🐼</div>
+      <h2>你好！我是泡泡</h2>
+      <p>我会陪你一起学汉字！</p>
+    </div>
+    <div class="onboarding-step hidden" data-step="1">
+      <div class="ob-icon">📖</div>
+      <h2>每天学几个新字</h2>
+      <p>看卡片 → 翻一翻 → 点"认识！"</p>
+    </div>
+    <div class="onboarding-step hidden" data-step="2">
+      <div class="ob-icon">🔄</div>
+      <h2>常常复习</h2>
+      <p>学过的字会再回来考考你，<br>这样记得最牢！</p>
+    </div>
+    <div class="onboarding-step hidden" data-step="3">
+      <div class="ob-icon">✍️</div>
+      <h2>还能学写字！</h2>
+      <p>点 ✍️ 就能看笔顺、用手指描红</p>
+    </div>
+    <div class="onboarding-dots" id="onboardingDots"></div>
+    <button class="start-btn" id="onboardingNextBtn">下一步 →</button>
+  </div>
+</div>
+
+<!-- ═══════ 庆祝动画层 ═══════ -->
+<div class="celebrate-layer" id="celebrateLayer"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
